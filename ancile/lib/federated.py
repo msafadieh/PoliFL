@@ -5,7 +5,7 @@ name = 'federated'
 def new_model(policy):
     from ancile.core.primitives import DataPolicyPair
     import yaml
-    from utils.text_load import load_data
+    from ancile.utils.text_load import load_data
     from ancile.lib.federated_helpers.utils.text_helper import TextHelper
 
     corpus = load_data('corpus_small.pt.tar')
