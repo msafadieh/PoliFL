@@ -1,4 +1,38 @@
-# PoliBox 
+# PoliBox
+
+## Databox
+
+You first need to install and configure the Databox platform (https://github.com/me-box/databox).
+
+### Requirements
+
+- Python 3.7+
+- Docker
+
+### Install and Configure Databox
+
+Git clone [Databox](https://github.com/me-box/databox) into `databox-ancile\databox_dev` using `$ git clone git@github.com:me-box/databox.git databox_dev`.
+
+Start Databox using `$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --network host -t databoxsystems/databox:0.5.2 /databox start -sslHostName $(hostname)`.
+
+Wait until databox is loaded and login to http://127.0.0.1 (non https version). Download and install the certificate. Click at "DATABOX DASHBOARD".
+
+Make sure that Databox runs correctly and you can login without any issues (password is random and you can copy it from the terminal).
+
+You can now stop Databox using `$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -t databoxsystems/databox:0.5.2 /databox stop`.
+
+Copy both `driver-reddit-simulator` and `app-ancile` folders (located under `databox`) into `databox_dev\build`.
+
+Under `databox_dev`, run `$ ./databox-install-component driver-reddit-simulator databoxsystems 0.5.2` and `$ ./databox-install-component app-ancile databoxsystems 0.5.2`.
+
+Start Databox again and go to: `My App -> App Store` and upload the two manifests (`databox-manifest.json`) from `driver-reddit-simulator` and `app-ancile` folders. The new driver and app will now appear in the App Store.
+
+Go to the App Store and install `driver-reddit-simulator`. After succesfully installed, click at the `driver-reddit-simulator` to see the configuration page (`Reddit Simulator Driver Configuration`), and click at `Save Configuration` to load data from `_davros` account.
+
+Go to the App Store and install `app-ancile`.
+
+Test that reddit data can be retrieved when visiting https://127.0.0.1/app-ancile/ui/tsblob/latest?data_source_id=redditSimulatorData.
+
 
 ## Setting up the central node
 
@@ -40,13 +74,13 @@ Create a RabbitMQ user to be able to connect from outside localhost.
 1. Clone this repository.
 
 ```
-git clone https://github.com/minoskt/polibox.git
+git clone https://github.com/minoskt/PoliBox.git
 ```
 
 2. setup a virtual environment using `venv`.
 
 ```
-> cd polibox
+> cd PoliBox
 > python -m venv .env
 > source .env/bin/activate
 > pip install -r requirements.txt
@@ -59,6 +93,7 @@ username1;ANYF*
 username2;ANYF*
 ...
 ```
+
 
 ## Setting up the edge node
 
@@ -102,7 +137,7 @@ The key's randomart image is:
 1. Clone this repository.
 
 ```
-git clone https://github.com/minoskt/polibox.git
+git clone https://github.com/minoskt/PoliBox.git
 ```
 
 2. Setup a virtual environment using `venv`.
@@ -127,7 +162,47 @@ git clone https://github.com/minoskt/polibox.git
 }
 ```
 
-## Running the experiment
+
+
+## Evaluate Edge-Device Overheads
+
+### Requirements
+
+- Python 3.7+
+- Docker
+- Affective Norms for English Words (ANEW) Dataset (required file: `ANEW2010All.txt`)
+- Reddit Dataset from: https://github.com/ebagdasa/backdoor_federated_learning/blob/master/README.md
+
+### Running the evaluations
+
+You can evaluate the three use-cases:
+1. Text Filtering Task
+2. Language Modeling Task (small)
+3. Language Modeling Task (large)
+
+For 1., run `python anew_analyse.py`.
+For 2. and 3., run `python ancile/test/test_federated.py`.
+To switch the model between `small` and `large`, edit `ancile/lib/federated/utils/words.yaml`.
+
+For the `large` model, use:
+```
+emsize: 200
+nhid: 200
+nlayers: 2
+```
+
+For the `small` model, use:
+```
+emsize: 20
+nhid: 20
+nlayers: 1
+```
+
+After you execute an evaluation script (1., 2. or 3.), copy the reported `Process ID` and use it as an argument in: `bash eval-process.sh <Process ID>`. This script needs to be executed in parallel with the evaluation script.
+
+
+
+## Evaluate System Scaling
 
 ### On each edge node
 

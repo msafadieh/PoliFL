@@ -1,0 +1,44 @@
+{
+	"manifest-version": 1,
+	"name": "app-ancile",
+	"version": "0.0.1",
+	"description": "A Databox app to support Cornell Tech's Ancile Project",
+	"author": "Kleomenis Katevas <k.katevas@imperial.ac.uk> ()",
+	"license": "MIT",
+	"databox-type": "app",
+	"tags": [
+		"store",
+		"blob",
+		"db",
+		"native",
+		"json",
+		"timeseries"
+	],
+	"homepage": "https://github.com/minoskt/app-ancile",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/minoskt/app-ancile.git"
+	},
+	"packages": [
+		{
+			"name": "Reddit Data",
+			"purpose": "To connect DataBox with AncileCore",
+			"install": "required",
+			"risks": "TBD",
+			"benefits": "Use Ancile for policy management.",
+			"datastores": [ "redditSimulatorData" ]
+		}
+	],
+	"resource-requirements": {
+		"store": "core-store"
+	},
+	"datasources": [
+		{
+			"type": "redditSimulatorData",
+			"required": true,
+			"name": "redditSimulatorData",
+			"clientid": "redditSimulatorData",
+			"granularities": []
+		}
+	]
+}
