@@ -1,88 +1,77 @@
-import pika
+import os
+import subprocess
 import dill
-import ancile
-from ancile.core.core import execute
-from time import sleep, time
-from socket import gethostname
-from flask import Flask, request
-from multiprocessing import Process
-import sys
+import pika
 import requests
 import torch
+import ancile
+from ancile.core.core import execute
 
-creds = pika.PlainCredentials('test', 'test')
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='54.241.202.32', credentials=creds))
-channel = connection.channel()
-hostname = gethostname() if len(sys.argv) < 2 else sys.argv[1]
-url = "http://databox-nuc.dyson.ic.ac.uk"
-port = "5672"
-
-
-def start_server(corr_id, msg, hostname):
-
-    app = Flask(corr_id)
-
-    def handle():
-        request.environ.get('werkzeug.server.shutdown')()
-        return msg
-
-    app.add_url_rule(f'/{corr_id}', corr_id, handle)
-
-    server = Process(target=app.run, kwargs={"port": port, "host": "0.0.0.0"})
-    server.start()
-    channel.basic_publish(
-            exchange='',
-            routing_key=hostname+'_reply',
-            properties=pika.BasicProperties(
-                correlation_id=corr_id #properties.correlation_id,
-            ),
-            body=f"{url}:{port}/{corr_id}")
-    if not server.join(6000):
-        server.terminate()
-        server.join()
-
-def callback(hostname):
+def callback(edge_username, host, port, username)
     def debug(msg):
-        print(f"[{hostname}] {msg}")
-
+        print(f"[{edge_username}]: {msg}")
+    
     def func(ch, method, properties, body):
         debug(f"Received message of length {len(body)}")
-        body = requests.get(body).content
-        request = dill.loads(body)
-
+        request = requests.get(body)
         dpp = request.get("data_policy_pair")
         program = request.get("program")
-
         if not dpp:
             message = {"error": "data_policy_pair missing"}
         elif not program:
             message = {"error": "program missing"}
         else:
-            initial = time()
             res = execute(users_secrets=[],
                            program=program,
                             app_id=None,
                             app_module=None,
                             data_policy_pairs=[dpp])
-            delta = time() - initial
             if res["result"] == "error":
                 message = {"error": res["traceback"]}
             elif not res["data"]:
                 message = {"error": "no dpp found"}
             else:
-                message = {"data_policy_pair": res["data"][0], "delta": delta}
+                message = {"data_policy_pair": dpp}
 
+        filename = f'/tmp/{properties.correlation_id}'
+        with open(filename, 'wb') as f:
+            dill.dump(message, f)
+        print(f"Transferring to host")
+        subprocess.run(["scp", "-P", port, filename, f"{username}@{host}:{filename}"]) 
+        os.remove(filename)
+        debug(f"Returning response: {times}")
+        channel.basic_publish(
+            exchange='',
+            routing_key=host+'_reply',
+            properties=pika.BasicProperties(
+                correlation_id=properties.correlation_id,
+            ),
+            body='')
 
-        pickled_body = dill.dumps(message)
-        debug(f"Length of response: {len(pickled_body)}")
-        debug(f"Returning response: {message}")
-        start_server(properties.correlation_id, pickled_body, hostname)
     return func
 
-for i in range(1):
-    hn = f'{hostname}{i}'
-    channel.queue_declare(queue=hn)
-    channel.basic_consume(queue=hn, on_message_callback=callback(hn), auto_ack=True)
-    print(f'[{hn}] Waiting for messages. To exit press CTRL+C')
-channel.start_consuming()
+def main():
+    with open("config.json") as f:
+        configs = json.load(f)
 
+    username = configs.get("USERNAME")
+
+    ssh_port = configs.get("SSH_PORT")
+    ssh_username = configs.get("SSH_USERNAME")
+    host = configs.get("SERVER_URL")
+    rmq_username = configs.get("RMQ_USERNAME")
+    rmq_password = configs.get("RMQ_PASSWORD")
+
+    callback_fn = callback(username, host, ssh_port, ssh_username) 
+
+    creds = pika.PlainCredentials(rmq_username, rmq_password)
+    params = pika.ConnectionParameters(host=host, credentials=creds)
+    connection = pika.BlockingConnection(params)
+    channel = connection.channel()
+    channel.queue_declare(queue=username)
+    channel.basic_consume(queue=username, on_message_callback=callback, auto_ack=True)
+    print(f'[{username}] Waiting for messages. To exit press CTRL+C')
+    channel.start_consuming()
+
+if __name__ == "__main__":
+    main()
