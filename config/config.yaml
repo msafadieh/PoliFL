@@ -1,0 +1,10 @@
+# Change these before deployment
+SERVER_DEBUG: True
+CACHE: False
+library:
+    - numpy
+redis:
+    host: localhost
+    port: 6379
+    db: 1
+

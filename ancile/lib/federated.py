@@ -23,7 +23,7 @@ def select_users(user_count):
     from ancile.core.primitives import DataPolicyPair
     dpps = []
     
-    with open('users.txt') as f:
+    with open('config/users.txt') as f:
         user_policy = [u.split(";") for u in f.read().split('\n') if u]
 
     if len(users) < user_count:

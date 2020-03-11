@@ -51,7 +51,7 @@ def callback(edge_username, host, port, username)
     return func
 
 def main():
-    with open("config.json") as f:
+    with open("config/config.json") as f:
         configs = json.load(f)
 
     username = configs.get("USERNAME")

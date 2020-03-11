@@ -43,7 +43,7 @@ git clone https://github.com/minoskt/polibox.git
 > pip install -r requirements.txt
 ```
 
-3. Add users and policies to `users.txt` by using the template in `users_example.txt`. Each line has a username and password separated by a semi-colon.
+3. Add users and policies to `config/users.txt` by using the template in `users_example.txt`. Each line has a username and password separated by a semi-colon.
 
 ```
 username1;ANYF*
@@ -105,7 +105,7 @@ git clone https://github.com/minoskt/polibox.git
 > pip install -r requirements.txt
 ```
 
-3. Create a configuration file `config.json` based on the provided `config_example.json`. The edge node's username is the same one that is associated witht the policy. Use the RabbitMQ credentials that you created on the central node.
+3. Create a configuration file `config/config.json` based on the provided `config/config_example.json`. The edge node's username is the same one that is associated witht the policy. Use the RabbitMQ credentials that you created on the central node.
 
 ```
 {
@@ -132,7 +132,7 @@ To start an edge node, activate the python environment and run `edge.py`.
 
 ### On the central node
 
-Modify `federated.select_users`, `general.sample_data_policy_pairs`, and `federated.average` in `program.py` tp match the number of users in `users.txt`. Activate the python environment and run `central.py`.
+Modify `federated.select_users`, `general.sample_data_policy_pairs`, and `federated.average` in `program.py` tp match the number of users in `config/users.txt`. Activate the python environment and run `central.py`.
 
 ```
 > cd PoliBox
