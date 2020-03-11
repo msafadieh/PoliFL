@@ -1,4 +1,3 @@
-#from memory_profiler import profile
 from ancile.core.decorators import TransformDecorator
 name = 'federated'
 
@@ -22,18 +21,18 @@ def new_model(policy):
 def select_users(user_count):
     import random
     from ancile.core.primitives import DataPolicyPair
-    policy = "ANYF*"
     dpps = []
     
     with open('users.txt') as f:
-        users = [u for u in f.read().split('\n') if u]
+        user_policy = [u.split(";") for u in f.read().split('\n') if u]
 
     if len(users) < user_count:
         raise Exception("Not enough users")
 
-    sample = random.sample(users, user_count)
-    for model_id, target_name in enumerate(sample):
-
+    sample = random.sample(user_policy, user_count)
+    for model_id, target in enumerate(sample):
+        
+        target_name, policy = target
         dpp = DataPolicyPair(policy=policy)
         dpp._data = {
             "target_name": target_name,
