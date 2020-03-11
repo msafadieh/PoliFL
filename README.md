@@ -1,6 +1,6 @@
 # PoliBox
 
-## Databox
+## Installing and Configuring Databox
 
 You first need to install and configure the Databox platform (https://github.com/me-box/databox).
 
@@ -9,7 +9,7 @@ You first need to install and configure the Databox platform (https://github.com
 - Python 3.7+
 - Docker
 
-### Install and Configure Databox
+### Install Databox
 
 Git clone [Databox](https://github.com/me-box/databox) into `databox-ancile\databox_dev` using `$ git clone git@github.com:me-box/databox.git databox_dev`.
 
@@ -20,6 +20,8 @@ Wait until databox is loaded and login to http://127.0.0.1 (non https version). 
 Make sure that Databox runs correctly and you can login without any issues (password is random and you can copy it from the terminal).
 
 You can now stop Databox using `$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -t databoxsystems/databox:0.5.2 /databox stop`.
+
+### Install required apps and drivers
 
 Copy both `driver-reddit-simulator` and `app-ancile` folders (located under `databox`) into `databox_dev\build`.
 
