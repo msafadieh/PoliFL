@@ -52,7 +52,6 @@ class RemoteClient:
         self.error = None
         self.correlation_ids = set()
         self.callback_result = None
-        self.time = None
         self.lock = Lock()
         self.polling = False
 
@@ -64,15 +63,14 @@ class RemoteClient:
         self.channel.basic_qos(prefetch_count=1, global_qos=True)
 
     def __on_response(self, ch, method, props, body):
-        from time import time
         import dill
-        arrived = time() - self.time
-
+        import os
         if (not self.error) and props.correlation_id in self.correlation_ids:
             print(props.correlation_id)
-            with open(f'/var/www/html/model', 'rb') as f:
+            filename = f'/tmp/{props.correlation_id}'
+            with open(filename, 'rb') as f:
                response = dill.load(f)
-
+            os.remove(filename)
             if "error" in response:
                 self.error = response["error"]
                 return
@@ -80,18 +78,14 @@ class RemoteClient:
             dpp = response["data_policy_pair"]
             dpp._data = dpp._data["global_model"]
             self.callback_result = self.callback(initial=self.callback_result, dpp=dpp)
-            self.__log((arrived, time()-self.time, bytes.decode(body), ))
             self.correlation_ids.remove(props.correlation_id)
-
 
     def send_to_edge(self, model, participant_dpp, program):
         from ancile.core.primitives import DataPolicyPair
-        from time import time
         import uuid
         from ancile.lib.federated_helpers.messaging import send_message
         from threading import Thread
 
-        self.time = self.time or time()
         dpp_to_send = DataPolicyPair(policy=participant_dpp._policy)
         dpp_to_send._data = {
                 "global_model": model._data["model"],
@@ -119,19 +113,6 @@ class RemoteClient:
             self.polling = True
             Thread(target=self.__loop, daemon=True).start()
 
-    @staticmethod
-    def __log(tupl):
-        import os
-
-        to_write = []
-        path = f'times-{self.time}.csv'
-        if not os.path.isfile(path):
-            to_write.append("response arrival (in seconds),processing time (in seconds),execution time (in seconds)")
-        to_write.append(','.join(map(str,tupl)))
-        to_write.append('')
-        with open(path, 'a') as f:
-            f.write('\n'.join(to_write))
-
     def __loop(self):
 
         self.channel.start_consuming()
@@ -147,7 +128,6 @@ class RemoteClient:
 
             if not self.correlation_ids:
                 self.polling = False
-                self.time = None
                 self.callback_result = None
                 return self.callback_result
 

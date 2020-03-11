@@ -24,7 +24,16 @@ Create a RabbitMQ user to be able to connect from outside localhost.
 
 ### Configure NGINX
 
-Make sure that the user running the central has read-write accesst to `/var/www/html`.
+1. Make sure that the user running the central has read-write accesst to `/var/www/html`.
+
+2. Create a configuration file in `config/config_central.json` with the URL and port of your server.
+
+```
+{
+	"URL": "",
+	"PORT": ""
+}
+```
 
 ### Configure Python environment
 
@@ -105,7 +114,7 @@ git clone https://github.com/minoskt/polibox.git
 > pip install -r requirements.txt
 ```
 
-3. Create a configuration file `config/config.json` based on the provided `config/config_example.json`. The edge node's username is the same one that is associated witht the policy. Use the RabbitMQ credentials that you created on the central node.
+3. Create a configuration file `config/config_edge.json` based on the provided `config/config_edge_example.json`. The edge node's username is the same one that is associated witht the policy. Use the RabbitMQ credentials that you created on the central node.
 
 ```
 {

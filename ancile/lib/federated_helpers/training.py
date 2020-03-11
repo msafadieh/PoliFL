@@ -27,7 +27,7 @@ import numpy as np
 
 import random
 from ancile.lib.federated_helpers.utils.utils import *
-from utils.text_load import *
+from ancile.utils.text_load import *
 
 criterion = torch.nn.CrossEntropyLoss()
 

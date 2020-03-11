@@ -1,20 +1,22 @@
 import os
 import dill
 import pika
+import json
 
 def send_message(target, body, corr_id, channel, callback, create=False):
-
-    url = "http://143.229.6.52"
-    port = "80"
+    
+    with open('config_central.json') as f:
+        config = json.load(f)
+    
+    url = config["URL"]
+    port = config["PORT"]
 
     callback_queue = channel.queue_declare(queue=f'{target}_reply', durable=True).method.queue
     channel.basic_consume(
         queue=callback_queue,
         on_message_callback=callback,
         auto_ack=True)
-    filename = f'/var/www/html/model'
-    if not create:
-        filename = "/dev/null"
+    filename = f'/var/www/html/{corr_id}'
     with open(filename, 'wb') as f:
         dill.dump(body, f)
 

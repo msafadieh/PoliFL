@@ -8,7 +8,7 @@ import logging
 
 from ancile.lib.federated_helpers.models.word_model import RNNModel
 # from utils.nlp_dataset import NLPDataset
-from utils.text_load import *
+from ancile.utils.text_load import *
 
 logger = logging.getLogger("logger")
 POISONED_PARTICIPANT_POS = 0
