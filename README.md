@@ -15,7 +15,7 @@ Git clone [Databox](https://github.com/me-box/databox) into `databox-ancile\data
 
 Start Databox using `$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --network host -t databoxsystems/databox:0.5.2 /databox start -sslHostName $(hostname)`.
 
-Wait until databox is loaded and login to http://127.0.0.1 (non https version). Download and install the certificate. Click at "DATABOX DASHBOARD".
+Wait until Databox is loaded and login to http://127.0.0.1 (non https version). Download and install the certificate. Click at "DATABOX DASHBOARD".
 
 Make sure that Databox runs correctly and you can login without any issues (password is random and you can copy it from the terminal).
 
@@ -29,7 +29,7 @@ Under `databox_dev`, run `$ ./databox-install-component driver-reddit-simulator 
 
 Start Databox again and go to: `My App -> App Store` and upload the two manifests (`databox-manifest.json`) from `driver-reddit-simulator` and `app-ancile` folders. The new driver and app will now appear in the App Store.
 
-Go to the App Store and install `driver-reddit-simulator`. After succesfully installed, click at the `driver-reddit-simulator` to see the configuration page (`Reddit Simulator Driver Configuration`), and click at `Save Configuration` to load data from `_davros` account.
+Go to the App Store and install `driver-reddit-simulator`. After successfully installed, click at the `driver-reddit-simulator` to see the configuration page (`Reddit Simulator Driver Configuration`), and click at `Save Configuration` to load data from `_davros` account.
 
 Go to the App Store and install `app-ancile`.
 
@@ -151,7 +151,7 @@ git clone https://github.com/minoskt/PoliBox.git
 > pip install -r requirements.txt
 ```
 
-3. Create a configuration file `config/config_edge.json` based on the provided `config/config_edge_example.json`. The edge node's username is the same one that is associated witht the policy. Use the RabbitMQ credentials that you created on the central node.
+3. Create a configuration file `config/config_edge.json` based on the provided `config/config_edge_example.json`. The edge node's username is the same one that is associated with the policy. Use the RabbitMQ credentials that you created on the central node.
 
 ```
 {
