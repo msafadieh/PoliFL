@@ -1,6 +1,8 @@
 {
 	"USERNAME": "",
+	"SERVER_URL": "",
 	"SSH_USERNAME": "",
-	"SSH_HOST": "",
-	"SSH_PORT": ""
+	"SSH_PORT": "",
+	"RMQ_USERNAME": "",
+	"RMQ_PASSWORD": ""
 }
