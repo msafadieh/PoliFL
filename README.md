@@ -216,7 +216,7 @@ To start an edge node, activate the python environment and run `edge.py`.
 
 ### On the central node
 
-Modify `federated.select_users`, `general.sample_data_policy_pairs`, and `federated.average` in `program.py` tp match the number of users in `config/users.txt`. Activate the python environment and run `central.py`.
+Modify `federated.select_users`, `general.sample_data_policy_pairs`, and `federated.average` in `program.py` to match the number of users in `config/users.txt`. Activate the python environment and run `central.py`.
 
 ```
 > cd PoliBox
