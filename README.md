@@ -184,7 +184,7 @@ You can evaluate the three use-cases:
 
 For 1., run `python anew_analyse.py`.
 For 2. and 3., run `python ancile/test/test_federated.py`.
-To switch the model between `small` and `large`, edit `ancile/lib/federated/utils/words.yaml`.
+To switch the model between `small` and `large`, edit `ancile/lib/federated_helpers/utils/words.yaml`.
 
 For the `large` model, use:
 ```
