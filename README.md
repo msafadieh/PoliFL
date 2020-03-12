@@ -11,21 +11,21 @@ You first need to install and configure the Databox platform (https://github.com
 
 ### Install Databox
 
-Git clone [Databox](https://github.com/me-box/databox) into `databox-ancile\databox_dev` using `$ git clone git@github.com:me-box/databox.git databox_dev`.
+Git clone [Databox](https://github.com/me-box/databox) into `databox-ancile\databox_dev` using `git clone git@github.com:me-box/databox.git databox_dev`.
 
-Start Databox using `$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --network host -t databoxsystems/databox:0.5.2 /databox start -sslHostName $(hostname)`.
+Start Databox using `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --network host -t databoxsystems/databox:0.5.2 /databox start -sslHostName $(hostname)`.
 
 Wait until Databox is loaded and login to http://127.0.0.1 (non https version). Download and install the certificate. Click at "DATABOX DASHBOARD".
 
 Make sure that Databox runs correctly and you can login without any issues (password is random and you can copy it from the terminal).
 
-You can now stop Databox using `$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -t databoxsystems/databox:0.5.2 /databox stop`.
+You can now stop Databox using `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -t databoxsystems/databox:0.5.2 /databox stop`.
 
 ### Install required apps and drivers
 
 Copy both `driver-reddit-simulator` and `app-ancile` folders (located under `databox`) into `databox_dev\build`.
 
-Under `databox_dev`, run `$ ./databox-install-component driver-reddit-simulator databoxsystems 0.5.2` and `$ ./databox-install-component app-ancile databoxsystems 0.5.2`.
+Under `databox_dev`, run `./databox-install-component driver-reddit-simulator databoxsystems 0.5.2` and `./databox-install-component app-ancile databoxsystems 0.5.2`.
 
 Start Databox again and go to: `My App -> App Store` and upload the two manifests (`databox-manifest.json`) from `driver-reddit-simulator` and `app-ancile` folders. The new driver and app will now appear in the App Store.
 
@@ -170,10 +170,8 @@ git clone https://github.com/minoskt/PoliBox.git
 
 ### Requirements
 
-- Python 3.7+
-- Docker
 - Affective Norms for English Words (ANEW) Dataset (required file: `ANEW2010All.txt`)
-- Reddit Dataset from: https://github.com/ebagdasa/backdoor_federated_learning/blob/master/README.md
+- Reddit Dataset from: https://drive.google.com/file/d/1yAmEbx7ZCeL45hYj5iEOvNv7k9UoX3vp/view?usp=sharing
 
 ### Running the evaluations
 
