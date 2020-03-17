@@ -235,4 +235,4 @@ The authors would like to thank Nate Foster, Fred B. Schneider, and Eleanor Birr
 
 ## License
 
-[MIT License](LICENSE.md)
+[MIT License](LICENSE)
