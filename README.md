@@ -1,5 +1,8 @@
 # PoliBox
 
+PoliBox is a decentralized, edge-based framework for policy-based personal data analytics. It brings together a number of existing established components to provide privacy-preserving analytics within a distributed setting. For more information, please read our ongoing work [Decentralized Policy-Based Private Analytics](https://arxiv.org/abs/2003.06612).
+
+
 ## Installing and Configuring Databox
 
 You first need to install and configure the Databox platform (https://github.com/me-box/databox).
@@ -223,3 +226,8 @@ Modify `federated.select_users`, `general.sample_data_policy_pairs`, and `federa
 > source .env/bin/activate
 > python central.py
 ```
+
+
+## Acknowledgments
+
+The authors would like to thank Nate Foster, Fred B. Schneider, and Eleanor Birrell for the initial productive discussions and ideas. This work was supported in part by the NSF Grant 1642120. Haddadi and Katevas were partially funded by the EPSRC Databox project EP/N028260/1 and the EPSRC DADA project EP/R03351X/1. This work was done while Katevas was at Imperial College London.
