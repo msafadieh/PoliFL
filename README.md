@@ -230,7 +230,7 @@ Modify `federated.select_users`, `general.sample_data_policy_pairs`, and `federa
 
 ## Acknowledgments
 
-The authors would like to thank Nate Foster, Fred B. Schneider, and Eleanor Birrell for the initial productive discussions and ideas. This work was supported in part by the NSF Grant 1642120. Haddadi and Katevas were partially funded by the EPSRC Databox project EP/N028260/1 and the EPSRC DADA project EP/R03351X/1. This work was done while Katevas was at Imperial College London.
+The authors would like to thank Nate Foster, Fred B. Schneider, and Eleanor Birrell for the initial productive discussions and ideas. This work was supported in part by the NSF Grant 1642120. Haddadi and Katevas were partially funded by the EPSRC Databox project EP/N028260/1 and the EPSRC DADA project EP/R03351X/1.
 
 
 ## License
