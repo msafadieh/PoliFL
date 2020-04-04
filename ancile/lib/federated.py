@@ -26,7 +26,7 @@ def select_users(user_count):
     with open('config/users.txt') as f:
         user_policy = [u.split(";") for u in f.read().split('\n') if u]
 
-    if len(users) < user_count:
+    if len(user_policy) < user_count:
         raise Exception("Not enough users")
 
     sample = random.sample(user_policy, user_count)
