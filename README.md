@@ -14,7 +14,7 @@ You first need to install and configure the Databox platform (https://github.com
 
 ### Install Databox
 
-Git clone [Databox](https://github.com/me-box/databox) into `databox-ancile\databox_dev` using `git clone git@github.com:me-box/databox.git databox_dev`.
+Git clone [Databox](https://github.com/me-box/databox) into `PoliBox\databox_dev` using `git clone git@github.com:me-box/databox.git databox_dev`.
 
 Start Databox using `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --network host -t databoxsystems/databox:0.5.2 /databox start -sslHostName $(hostname)`.
 
