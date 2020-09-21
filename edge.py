@@ -1,77 +1,61 @@
+#! /usr/bin/env python3
 import os
-import subprocess
+from io import BytesIO
+from threading import Thread
+
+import certifi
 import dill
-import pika
+from flask import Flask, make_response, request
+import pycurl
 import requests
-import torch
+
 import ancile
 from ancile.core.core import execute
 
-def callback(edge_username, host, port, username)
-    def debug(msg):
-        print(f"[{edge_username}]: {msg}")
-    
-    def func(ch, method, properties, body):
-        debug(f"Received message of length {len(body)}")
-        request = requests.get(body)
-        dpp = request.get("data_policy_pair")
-        program = request.get("program")
-        if not dpp:
-            message = {"error": "data_policy_pair missing"}
-        elif not program:
-            message = {"error": "program missing"}
-        else:
-            res = execute(users_secrets=[],
-                           program=program,
-                            app_id=None,
-                            app_module=None,
-                            data_policy_pairs=[dpp])
-            if res["result"] == "error":
-                message = {"error": res["traceback"]}
-            elif not res["data"]:
-                message = {"error": "no dpp found"}
-            else:
-                message = {"data_policy_pair": dpp}
+WEBROOT = os.environ.get("WEBROOT", "/var/www/html")
+WEBPATH = os.environ.get("WEBPATH", "/")
 
-        filename = f'/tmp/{properties.correlation_id}'
-        with open(filename, 'wb') as f:
-            dill.dump(message, f)
-        print(f"Transferring to host")
-        subprocess.run(["scp", "-P", port, filename, f"{username}@{host}:{filename}"]) 
-        os.remove(filename)
-        debug(f"Returning response: {times}")
-        channel.basic_publish(
-            exchange='',
-            routing_key=host+'_reply',
-            properties=pika.BasicProperties(
-                correlation_id=properties.correlation_id,
-            ),
-            body='')
+app = Flask(__name__)
 
-    return func
+def execute_program(model_url, callback_url, program):
+    byte_buffer = BytesIO()
+    curl = pycurl.Curl()
+    curl.setopt(curl.URL, model_url)
+    curl.setopt(curl.WRITEDATA, str_buffer)
+    curl.setopt(curl.CAINFO, certifi.where())
+    curl.perform()
+    curl.close()
+    pickled_dpp = byte_buffer.getvalue()
+    if pickled_dpp:
+        dpp = dill.loads(pickled_dpp)
+    res = execute(users_secrets=[],
+                  program=program,
+                  app_id=None,
+                  app_module=None,
+                  data_policy_pairs=[dpp])
+    if res["result"] == "error":
+        message = {"status": "ERROR", "error": res["traceback"]}
+    elif not res["data"]:
+        message = {"status": "ERROR", "error": "No DPP returned"}
+    else:
+        uuid = str(uuid4())
+        with open(os.path.join(WEBROOT, uuid), "wb") as f:
+            dill.dump(f, res["data"])
+            message = {"status": "OK", "data_policy_pair": "{}{}".format(WEBPATH, uuid)}
+    print(message)
+    res = requests.post(callback_url, json=message)
+    print(res.text)
 
-def main():
-    with open("config/config_edge.json") as f:
-        configs = json.load(f)
+@app.route("/status")
+def status():
+    return make_response("OK", 200)
 
-    username = configs.get("USERNAME")
+@app.route("/execute")
+def execute():
+    json = request.json
 
-    ssh_port = configs.get("SSH_PORT")
-    ssh_username = configs.get("SSH_USERNAME")
-    host = configs.get("SERVER_URL")
-    rmq_username = configs.get("RMQ_USERNAME")
-    rmq_password = configs.get("RMQ_PASSWORD")
+    if json:
+        Thread(target=execute_program, kwargs=json).start()
+        return make_response("OK", 200)
+    return make_response("BAD", 500)
 
-    callback_fn = callback(username, host, ssh_port, ssh_username) 
-
-    creds = pika.PlainCredentials(rmq_username, rmq_password)
-    params = pika.ConnectionParameters(host=host, credentials=creds)
-    connection = pika.BlockingConnection(params)
-    channel = connection.channel()
-    channel.queue_declare(queue=username)
-    channel.basic_consume(queue=username, on_message_callback=callback, auto_ack=True)
-    print(f'[{username}] Waiting for messages. To exit press CTRL+C')
-    channel.start_consuming()
-
-if __name__ == "__main__":
-    main()

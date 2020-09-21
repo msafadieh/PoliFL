@@ -7,7 +7,7 @@ def new_model(policy):
     from ancile.utils.text_load import load_data
     from ancile.lib.federated_helpers.utils.text_helper import TextHelper
 
-    corpus = load_data('corpus_small.pt.tar')
+    corpus = load_data('data/corpus_small.pt.tar')
     with open('ancile/lib/federated_helpers/utils/words.yaml') as f:
         params = yaml.load(f)
     helper = TextHelper(params=params, current_time='None',
@@ -18,118 +18,96 @@ def new_model(policy):
     dpp._data = {"model": model, "helper": helper}
     return dpp
 
-def select_users(user_count):
+def select_users(user_count, dpps):
     import random
-    from ancile.core.primitives import DataPolicyPair
-    dpps = []
-    
-    with open('config/users.txt') as f:
-        user_policy = [u.split(";") for u in f.read().split('\n') if u]
+#    from ancile.core.primitives import DataPolicyPair
 
-    if len(user_policy) < user_count:
+    if len(dpps) < user_count:
         raise Exception("Not enough users")
+    
+    return random.sample(dpps, user_count)
 
-    sample = random.sample(user_policy, user_count)
-    for model_id, target in enumerate(sample):
-        
-        target_name, policy = target
-        dpp = DataPolicyPair(policy=policy)
-        dpp._data = {
-            "target_name": target_name,
-            "model_id": model_id
-        }
-
-        dpps.append(dpp)
-    return dpps
+#    with open('config/users.txt') as f:
+#        user_policy = [u.split(";") for u in f.read().split('\n') if u]
+#
+#    return dpps
+#
+#    sample = random.sample(user_policy, user_count)
+#    for model_id, target in enumerate(sample):
+#        
+#        target_name, policy = target
+#        dpp = DataPolicyPair(policy=policy)
+#        dpp._data = {
+#            "target_name": target_name,
+#            "model_id": model_id
+#        }
+#
+#        dpps.append(dpp)
 
 
 class RemoteClient:
-    def __init__(self, callback):
-        from queue import Queue
-        from threading import Lock
-        import pika
+    def __init__(self, callback, queue):
         self.callback = callback
-        self.error = None
-        self.correlation_ids = set()
         self.callback_result = None
-        self.lock = Lock()
-        self.polling = False
+        self.queue = queue
+        self.nodes = set()
 
-        params = pika.ConnectionParameters(host='localhost',
-                                           heartbeat=3600,
-                                           blocked_connection_timeout=600)
-        self.connection = pika.BlockingConnection(params)
-        self.channel = self.connection.channel()
-        self.channel.basic_qos(prefetch_count=1, global_qos=True)
-
-    def __on_response(self, ch, method, props, body):
+    def __process_model(self, model_url):
+        from io import BytesIO
+        import pycurl
         import dill
-        import os
-        if (not self.error) and props.correlation_id in self.correlation_ids:
-            print(props.correlation_id)
-            filename = f'/tmp/{props.correlation_id}'
-            with open(filename, 'rb') as f:
-               response = dill.load(f)
-            os.remove(filename)
-            if "error" in response:
-                self.error = response["error"]
-                return
+        bytes_buffer = BytesIO() 
+        curl = pycurl.Curl()
+        curl.setopt(curl.URL, model_url)
+        curl.setopt(curl.WRITEDATA, str_buffer)
+        curl.setopt(curl.CAINFO, certifi.where())
+        curl.perform()
+        curl.close()
 
-            dpp = response["data_policy_pair"]
-            dpp._data = dpp._data["global_model"]
-            self.callback_result = self.callback(initial=self.callback_result, dpp=dpp)
-            self.correlation_ids.remove(props.correlation_id)
+        dpp = dill.load(bytes_buffer)
+        self.callback_result = self.callback(initial=self.callback_result, dpp=dpp)
 
     def send_to_edge(self, model, participant_dpp, program):
         from ancile.core.primitives import DataPolicyPair
+        import dill
         import uuid
-        from ancile.lib.federated_helpers.messaging import send_message
-        from threading import Thread
+        import os
+        import requests
 
         dpp_to_send = DataPolicyPair(policy=participant_dpp._policy)
         dpp_to_send._data = {
                 "global_model": model._data["model"],
                 "helper": model._data["helper"],
-                "model_id": participant_dpp._data["model_id"]
+                "model_id": participant_dpp._data["model_id"],
                 }
-        target_name = participant_dpp._data["target_name"]
-        body = {"program": program, "data_policy_pair": dpp_to_send}
 
-        correlation_id = str(uuid.uuid4())
-        self.correlation_ids.add(correlation_id)
+        ip_address = participant_dpp._data["ip_address"]
+        callback_url = participant_dpp._data["callback_url"]
+        model_base_url = participant_dpp._data["model_url"]
+        webroot = participant_dpp._data["webroot"]
+        label = participant_dpp._data["label"]       
+        self.nodes.add(label)
 
-        self.lock.acquire()
-        print(f"queuing {target_name}")
-        send_message(target_name,
-                         body,
-                         correlation_id,
-                         self.channel,
-                         self.__on_response,
-                         not self.polling
-                         )
-        self.lock.release()
+        uuid = str(uuid.uuid4())
+        with open(os.path.join(webroot, uuid), 'w') as f:
+            dill.dump(f, dpp_to_send)
 
-        if not self.polling:
-            self.polling = True
-            Thread(target=self.__loop, daemon=True).start()
+        body = {
+                "program": program,
+                "model_url": f"{model_base_url}/{uuid}",
+                "callback_url": callback_url
+        }
 
-    def __loop(self):
+        requests.post(f"http://{ip_address}/execute", json=body)
 
-        self.channel.start_consuming()
-        while False:
-            self.lock.acquire()
-            self.connection.process_data_events()
-            self.lock.release()
+        print(f"queuing {label}")
 
     def poll_and_process_responses(self):
-        while True:
-            if self.error:
-                raise self.error
-
-            if not self.correlation_ids:
-                self.polling = False
-                self.callback_result = None
-                return self.callback_result
+        while self.nodes:
+            node, model_url = self.queue.get()
+            self.__process_model(model_url)
+            self.nodes.remove(node)
+        return self.callback_result
 
 @TransformDecorator()
 def train_local(model, data_point):
