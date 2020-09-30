@@ -4,15 +4,11 @@ VOLUME /data
 
 RUN apt-get update && apt-get -y --no-install-recommends install nginx supervisor
 
-COPY requirements.txt /setup/
-RUN pip install -r /setup/requirements.txt
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-COPY run.sh /scripts/
-RUN chmod 755 /scripts/run.sh
-ENV PATH="/scripts:${PATH}"
+ADD . /ancile/
 
-ADD server /server
+WORKDIR /ancile
 
-WORKDIR /server
-
-CMD ["run.sh"]
+CMD ["/ancile/server/run.sh"]

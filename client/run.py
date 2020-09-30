@@ -5,7 +5,7 @@ import socket
 from urllib.parse import urlparse
 import requests
 
-TEMPLATE = os.environ.get("TEMPLATE", "/data/wg.tmpl")
+TEMPLATE = os.environ.get("TEMPLATE", "templates/wg.tmpl")
 
 NODE_NAME = os.environ["NODE_NAME"]
 NODE_KEY = os.environ["NODE_KEY"]
