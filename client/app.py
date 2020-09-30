@@ -21,7 +21,7 @@ def execute_program(model_url, callback_url, program):
     byte_buffer = BytesIO()
     curl = pycurl.Curl()
     curl.setopt(curl.URL, model_url)
-    curl.setopt(curl.WRITEDATA, str_buffer)
+    curl.setopt(curl.WRITEDATA, byte_buffer)
     curl.setopt(curl.CAINFO, certifi.where())
     curl.perform()
     curl.close()

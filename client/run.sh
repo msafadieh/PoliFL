@@ -30,11 +30,5 @@ fi
 
 wg-quick up "$WG_IFNAME"
 
-apt-get install -y --no-install-recommends curl
 wg
-while true; do
-	curl "http://10.253.0.1:8000"
-	sleep 5
-done
-
-
+exec gunicorn -b 0.0.0.0:8000 client:app
