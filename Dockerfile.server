@@ -1,0 +1,18 @@
+FROM python:3.8.5-buster
+
+VOLUME /data
+
+RUN apt-get update && apt-get -y --no-install-recommends install nginx supervisor
+
+COPY requirements.txt /setup/
+RUN pip install -r /setup/requirements.txt
+
+COPY run.sh /scripts/
+RUN chmod 755 /scripts/run.sh
+ENV PATH="/scripts:${PATH}"
+
+ADD server /server
+
+WORKDIR /server
+
+CMD ["run.sh"]
