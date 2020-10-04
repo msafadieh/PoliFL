@@ -25,7 +25,7 @@ if ! [ -f "${CONFIG_PATH}" ]; then
 	export NODE_NAME
 	export NODE_KEY
 	export CONFIG_PATH
-	PRIVATE_KEY="$(wg genkey)" PUBLIC_KEY="$(echo "$PRIVATE_KEY" | wg pubkey)" run.py
+	PRIVATE_KEY="$(wg genkey)" PUBLIC_KEY="$(echo "$PRIVATE_KEY" | wg pubkey)" client/run.py
 fi
 
 wg-quick up "$WG_IFNAME"

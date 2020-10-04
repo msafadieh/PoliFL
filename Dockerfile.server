@@ -2,7 +2,8 @@ FROM python:3.8.5-buster
 
 VOLUME /data
 
-RUN apt-get update && apt-get -y --no-install-recommends install nginx supervisor
+RUN echo "deb http://deb.debian.org/debian/ buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
+RUN apt-get update && apt-get -y --no-install-recommends install nginx supervisor wireguard-tools
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt

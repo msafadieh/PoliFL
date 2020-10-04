@@ -200,7 +200,7 @@ def jobs_view(app_label, job_label):
                 dpp = DataPolicyPair(policy=policy.value)
                 dpp._data = {
                     "ip_address": config["IP_ADDRESS"],
-                    "callback_url": "http://{}/rpc/{}/{}/{}".format(config["IP_ADDRESS"], app_label, job_label policy.node.label),
+                    "callback_url": "http://{}/rpc/{}/{}/{}".format(config["IP_ADDRESS"], app_label, job_label, policy.node.label),
                     "model_base_url": "http://{}/{}".format(config["IP_ADDRESS"], config["WEBPATH"]),
                     "webroot": config["WEBROOT"],
                     "label": policy.node.label,
@@ -223,8 +223,8 @@ def jobs_view(app_label, job_label):
 
 @app.route("/rpc/<string:app_label>/<string:job_label>/<string:node_label>")
 def rpc_view(app_label, job_label, node_label):
-    node = db.session.query(Node).filter(Node.node_label=node_label,
-                                         Node.api_key=request.headers.get("X-API-Key", ""))
+    node = db.session.query(Node).filter(Node.node_label==node_label,
+                                         Node.api_key==request.headers.get("X-API-Key", ""))
 
     if not node:
         return make_403()
