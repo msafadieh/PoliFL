@@ -4,8 +4,8 @@ reddit_data = databox.get_latest_reddit_data(session="")
 trained_model = federated.train_local(model=model, data_point=reddit_data)
 result.return_to_web(dpp=trained_model)
 '''
-total_participant_dpps = federated.select_users(user_count=312)
-client = federated.RemoteClient(callback=federated.accumulate)
+total_participant_dpps = federated.select_users(user_count=1, dpps=data_policy_pairs)
+client = federated.RemoteClient(callback=federated.accumulate, queue=rpc_queue)
 model = federated.new_model(policy="ANYF*")
 
 rounds = 1

@@ -4,6 +4,7 @@ from flask import Flask, make_response, request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from server.ancile import execute_program
 from server.config import config
 from server.models import Application, Base, Node, Policy
 from server.networking import start_wireguard, add_peer, peer_down
@@ -17,8 +18,9 @@ queues = {}
 
 app = Flask(__name__)
 
-with open(config["PRIVKEY_PATH"]) as f:
-    start_wireguard(f.read().strip(), [(u.public_key, u.allowed_ips, ) for u in session.query(Node).all() if u.public_key])
+if config["WG_ON"]:
+    with open(config["PRIVKEY_PATH"]) as f:
+        start_wireguard(f.read().strip(), [(u.public_key, u.allowed_ips, ) for u in session.query(Node).all() if u.public_key])
 
 
 @app.route("/")
@@ -68,9 +70,9 @@ def nodes_view(label):
         if node:
             response = {"label": node.label}
             
-            response["configured"] = bool(node.allowed_ips)
+            response["configured"] = (not config["WG_ON"]) or bool(node.allowed_ips)
             response["apps"] = [app.label for app in node.applications]
-            
+
             if node.allowed_ips:
                 response["address"] = node.allowed_ips
                 response["public_key"] = node.public_key
@@ -196,12 +198,22 @@ def jobs_view(app_label, job_label):
                 return make_response("No policies found", 404)
     
             dpps = []
+            base = config["IP_ADDRESS"] if config["WG_ON"] else config["HOST"]
             for policy in policies:
+
+                if config["WG_ON"]:
+                    if policy.node.allowed_ips:
+                        node_host = policy.node.allowed_ips
+                    else:
+                        continue
+                else:
+                    node_host = policy.node.label
+
                 dpp = DataPolicyPair(policy=policy.value)
                 dpp._data = {
-                    "ip_address": config["IP_ADDRESS"],
-                    "callback_url": "http://{}/rpc/{}/{}/{}".format(config["IP_ADDRESS"], app_label, job_label, policy.node.label),
-                    "model_base_url": "http://{}/{}".format(config["IP_ADDRESS"], config["WEBPATH"]),
+                    "ip_address": node_host,
+                    "callback_url": "http://{}/rpc/{}/{}/{}".format(base, app_label, job_label, policy.node.label),
+                    "model_base_url": "http://{}/{}".format(base, config["WEBPATH"]),
                     "webroot": config["WEBROOT"],
                     "label": policy.node.label,
                 }

@@ -40,7 +40,7 @@ def gen_module_namespace():
 module_namespace = gen_module_namespace()
 
 
-def assemble_locals(storage, result, users_secrets, app_id, app_module=None, data_policy_pairs=None):
+def assemble_locals(storage, result, users_secrets, app_id, app_module=None, data_policy_pairs=None, rpc_queue=None):
     lcls = module_namespace
 
     def user(name: str) -> UserSecrets:
@@ -80,6 +80,7 @@ def assemble_locals(storage, result, users_secrets, app_id, app_module=None, dat
     lcls['return_to_app'] = result.return_to_app
     lcls['app'] = app_module
     lcls['data_policy_pairs'] = data_policy_pairs
+    lcls['rpc_queue'] = rpc_queue
     lcls['_getattr_'] = safer_getattr
 
     if configs['SERVER_DEBUG']:

@@ -7,7 +7,7 @@ def new_model(policy):
     from ancile.utils.text_load import load_data
     from ancile.lib.federated_helpers.utils.text_helper import TextHelper
 
-    corpus = load_data('data/corpus_small.pt.tar')
+    corpus = load_data('/data/corpus.pt.tar')
     with open('ancile/lib/federated_helpers/utils/words.yaml') as f:
         params = yaml.load(f)
     helper = TextHelper(params=params, current_time='None',
@@ -51,6 +51,7 @@ class RemoteClient:
         self.callback_result = None
         self.queue = queue
         self.nodes = set()
+        self.error = None
 
     def __process_model(self, model_url):
         from io import BytesIO
@@ -103,10 +104,22 @@ class RemoteClient:
         print(f"queuing {label}")
 
     def poll_and_process_responses(self):
-        while self.nodes:
+        while (not self.error) and self.nodes:
             node, model_url = self.queue.get()
-            self.__process_model(model_url)
-            self.nodes.remove(node)
+            if self.error:
+                continue
+            
+            if not node:
+                self.error = self.error or "Execution cancelled"
+            elif not model_url:
+                self.error = self.error or "error on node: {}".format(node)
+            else:
+                self.__process_model(model_url)
+                self.nodes.remove(node)
+
+        if self.error:
+            raise Exception(self.error)
+
         return self.callback_result
 
 @TransformDecorator()

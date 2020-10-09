@@ -8,8 +8,12 @@ RUN apt-get update && apt-get -y --no-install-recommends install nginx superviso
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+RUN mkdir /var/www/html/models
+
 ADD . /ancile/
+
+RUN cp /ancile/templates/nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /ancile
 
-CMD ["/ancile/client/run.sh"]
+CMD ["supervisord", "-c", "/ancile/templates/supervisor-client.conf"]
