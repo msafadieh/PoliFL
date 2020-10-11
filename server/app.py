@@ -1,5 +1,5 @@
 from functools import wraps
-from queue import Queue
+from queue import Empty, Queue
 from threading import Thread
 from uuid import uuid4
 
@@ -187,7 +187,10 @@ def jobs_view(app_label, job_label):
 
     if request.method == "GET":
         if app_label in jobs and job_label in jobs[app_label]:
-            status = jobs[app_label][job_label]["status_queue"].get_nowait()
+            try:
+                status = jobs[app_label][job_label]["status_queue"].get_nowait()
+            except Empty:
+                status = None
             if status:
                 jobs[app_label].pop(job_label)
                 return status
