@@ -16,7 +16,7 @@ UserInfoBundle = namedtuple("UserInfoBundle", ['username', 'policies',
                                                'tokens', 'private_data'])
 
 
-def execute(users_secrets, program, app_id=None, app_module=None, data_policy_pairs=None):
+def execute(users_secrets, program, app_id=None, app_module=None, data_policy_pairs=None, rpc_queue=None):
     r = redis.Redis(**REDIS_CONFIG)
     storage = Storage(redis_conneciton=r)
     json_output = dict()
@@ -32,6 +32,7 @@ def execute(users_secrets, program, app_id=None, app_module=None, data_policy_pa
                            app_id=app_id,
                            app_module=app_module,
                            data_policy_pairs=data_policy_pairs or list(),
+                           rpc_queue=rpc_queue
                            )
     try:
         c_program = retrieve_compiled(program, r)

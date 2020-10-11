@@ -1,5 +1,8 @@
 from functools import wraps
+from queue import Queue
+from threading import Thread
 from uuid import uuid4
+
 from flask import Flask, make_response, request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -14,7 +17,7 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-queues = {}
+jobs = {}
 
 app = Flask(__name__)
 
@@ -172,16 +175,19 @@ def policies_view(app_label, node_label):
             return make_response("OK", 200)
         return make_404()
 
-@app.route("/jobs/<string:app_label>/<string:job_label>/", methods=["GET", "POST", "DELETE", "PUT"])
+@app.route("/jobs/<string:app_label>/<string:job_label>", methods=["GET", "POST", "DELETE", "PUT"])
 def jobs_view(app_label, job_label):
     app = session.query(Application).filter(Application.label==app_label).first()
     
     if not app:
         return make_404()
 
+    if app.api_key != request.headers.get("X-API-Key"):
+        return make_403()
+
     if request.method == "GET":
         if app_label in jobs and job_label in jobs[app_label]:
-            status = status_queue.get_nowait()
+            status = jobs[app_label][job_label]["status_queue"].get_nowait()
             if status:
                 jobs[app_label].pop(job_label)
                 return status
@@ -190,6 +196,7 @@ def jobs_view(app_label, job_label):
         return make_404()
 
     if request.method == "POST":
+        program = request.json["program"]
         if (app_label not in jobs) or (job_label not in jobs[app_label]):
 
             policies = session.query(Policy).filter(Policy.application==app).all()
@@ -220,14 +227,17 @@ def jobs_view(app_label, job_label):
                 dpps.append(dpp)
             status_queue = Queue() 
             rpc_queue = Queue()
-            jobs[app_label] = jobs[app_label] or {}
+            thread = Thread(target=execute_program, args=(program, dpps, status_queue, rpc_queue, ))
+            jobs.setdefault(app_label, {})
             jobs[app_label][job_label] = {
-                "thread": Thread(target=execute_program, args=(dpps, status_queue, rpc_queue, )),
+                "thread": thread,
                 "status_queue": status_queue,
                 "rpc_queue": rpc_queue
             }
+            jobs[app_label]
+            thread.start()
 
-            return make_response(200, "OK")
+            return make_response("OK", 200)
 
     if request.method == "DELETE":
         if job_label in jobs:
