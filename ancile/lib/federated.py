@@ -84,14 +84,14 @@ class RemoteClient:
 
         ip_address = participant_dpp._data["ip_address"]
         callback_url = participant_dpp._data["callback_url"]
-        model_base_url = participant_dpp._data["model_url"]
+        model_base_url = participant_dpp._data["model_base_url"]
         webroot = participant_dpp._data["webroot"]
         label = participant_dpp._data["label"]       
         self.nodes.add(label)
 
         uuid = str(uuid.uuid4())
-        with open(os.path.join(webroot, uuid), 'w') as f:
-            dill.dump(f, dpp_to_send)
+        with open(os.path.join(webroot, uuid), 'wb+') as f:
+            dill.dump(dpp_to_send, f)
 
         body = {
                 "program": program,
@@ -99,9 +99,10 @@ class RemoteClient:
                 "callback_url": callback_url
         }
 
-        requests.post(f"http://{ip_address}/execute", json=body)
-
-        print(f"queuing {label}")
+        url = f"http://{ip_address}/execute"
+        print(f"queuing {label}: {url}")
+        resp = requests.post(url, json=body)
+        print(resp.text)
 
     def poll_and_process_responses(self):
         while (not self.error) and self.nodes:

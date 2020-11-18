@@ -13,7 +13,7 @@ while rounds:
     rounds = rounds - 1
     participants_data = general.sample_data_policy_pairs(
                             data_policy_pairs=total_participant_dpps,
-                            sample_number=312)
+                            sample_number=1)
     
     while participants_data:
         participant_dpp = participants_data.pop()

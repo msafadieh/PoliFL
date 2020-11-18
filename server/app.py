@@ -7,6 +7,7 @@ from flask import Flask, make_response, request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from ancile.core.primitives import DataPolicyPair
 from server.ancile import execute_program
 from server.config import config
 from server.models import Application, Base, Node, Policy
@@ -209,11 +210,13 @@ def jobs_view(app_label, job_label):
     
             dpps = []
             base = config["IP_ADDRESS"] if config["WG_ON"] else config["HOST"]
-            for policy in policies:
+            for model_id, policy in enumerate(policies):
 
                 if config["WG_ON"]:
                     if policy.node.allowed_ips:
                         node_host = policy.node.allowed_ips
+                        if "/" in node_host:
+                            node_host = node_host.rstrip("0123456789").rstrip("/")
                     else:
                         continue
                 else:
@@ -226,6 +229,7 @@ def jobs_view(app_label, job_label):
                     "model_base_url": "http://{}/{}".format(base, config["WEBPATH"]),
                     "webroot": config["WEBROOT"],
                     "label": policy.node.label,
+                    "model_id": model_id
                 }
                 dpps.append(dpp)
             status_queue = Queue() 
@@ -237,7 +241,6 @@ def jobs_view(app_label, job_label):
                 "status_queue": status_queue,
                 "rpc_queue": rpc_queue
             }
-            jobs[app_label]
             thread.start()
 
             return make_response("OK", 200)
@@ -246,9 +249,9 @@ def jobs_view(app_label, job_label):
         if job_label in jobs:
             jobs[job_label]["rpc_queue"].put(("", None, ))
 
-@app.route("/rpc/<string:app_label>/<string:job_label>/<string:node_label>")
+@app.route("/rpc/<string:app_label>/<string:job_label>/<string:node_label>", methods=["POST"])
 def rpc_view(app_label, job_label, node_label):
-    node = db.session.query(Node).filter(Node.node_label==node_label,
+    node = session.query(Node).filter(Node.label==node_label,
                                          Node.api_key==request.headers.get("X-API-Key", ""))
 
     if not node:
