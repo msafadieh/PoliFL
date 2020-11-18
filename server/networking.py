@@ -47,17 +47,20 @@ def get_taken_ips():
     for peer in wg.info(IFNAME)[0].WGDEVICE_A_PEERS.get('value', []):
         allowed_ips = peer.WGPEER_A_ALLOWEDIPS.get('value')
         if allowed_ips:
-            taken_ips.add(IPv4Interface(allowed_ips[0]['addr']).ip.compressed)
-    return taken_ips
+            ip = IPv4Interface(allowed_ips[0]['addr']).ip.compressed
+            taken_ips.add(ip)
+    return {f"{ip}/24" for ip in taken_ips}
 
-def add_peer(public_key):
+def add_peer(public_key, taken_ips=None):
 
     network = IPv4Interface(IFADDR).network
-    taken_ips = get_taken_ips()
+    taken_ips = taken_ips or set()
+    taken_ips = set(taken_ips).union(get_taken_ips())
+    print(taken_ips, flush=True)
     for ip in network:
 
+        ip = f"{ip}/24"
         if str(ip) not in taken_ips:
-            ip = f"{ip}/24"
             peer_up(public_key, ip)
             info = wg_info()
             return {
@@ -72,8 +75,9 @@ def add_peer(public_key):
 def peer_up(public_key, ipv4_address):
     peer = {
         "public_key": public_key,
-        "allowed_ips": [ipv4_address]
+        "allowed_ips": [ipv4_address[:-2] + "32"]
     }
+    print(peer, flush=True)
 
     wg = WireGuard()
     wg.set(IFNAME, peer=peer)

@@ -58,7 +58,7 @@ def nodes_view(label):
                 public_key = request.json["public_key"]
                 if node.public_key:
                     peer_down(node.public_key)
-                payload = add_peer(public_key)
+                payload = add_peer(public_key, [node.allowed_ips for node in session.query(Node).all()])
                 node.allowed_ips = payload["address"]
                 node.public_key = public_key
                 session.add(node)
@@ -193,8 +193,7 @@ def jobs_view(app_label, job_label):
             except Empty:
                 status = None
             if status:
-                jobs[app_label].pop(job_label)
-                return status
+                return jobs[app_label][job_label]
             else:
                 return "Running"
         return make_404()
@@ -229,7 +228,8 @@ def jobs_view(app_label, job_label):
                     "model_base_url": "http://{}/{}".format(base, config["WEBPATH"]),
                     "webroot": config["WEBROOT"],
                     "label": policy.node.label,
-                    "model_id": model_id
+                    "model_id": model_id,
+                    "timestamps": [], 
                 }
                 dpps.append(dpp)
             status_queue = Queue() 
@@ -244,7 +244,7 @@ def jobs_view(app_label, job_label):
             thread.start()
 
             return make_response("OK", 200)
-
+        return make_response("Conflicting names", 409)
     if request.method == "DELETE":
         if job_label in jobs:
             jobs[job_label]["rpc_queue"].put(("", None, ))

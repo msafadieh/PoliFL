@@ -2,6 +2,7 @@ from ancile.core.decorators import TransformDecorator
 name = 'federated'
 
 def new_model(policy):
+    from time import time
     from ancile.core.primitives import DataPolicyPair
     import yaml
     from ancile.utils.text_load import load_data
@@ -15,7 +16,7 @@ def new_model(policy):
     helper.load_data(corpus=corpus)
     model = helper.create_one_model().state_dict()
     dpp = DataPolicyPair(policy=policy)
-    dpp._data = {"model": model, "helper": helper}
+    dpp._data = {"model": model, "helper": helper, "timestamp": time()}
     return dpp
 
 def select_users(user_count, dpps):
@@ -51,11 +52,13 @@ class RemoteClient:
         self.callback_result = None
         self.queue = queue
         self.nodes = set()
+        self.timestamps = dict() 
         self.error = None
 
-    def __process_model(self, model_url):
+    def __process_model(self, model_url, label):
         #from io import BytesIO
         #import pycurl
+        from time import time
         import dill
         import requests
         #bytes_buffer = BytesIO() 
@@ -66,10 +69,13 @@ class RemoteClient:
         #curl.perform()
         #curl.close()
         resp = requests.get(model_url).content
+        receive_ts = time()
         dpp = dill.loads(resp)
+        dpp._data["timestamps"] = self.timestamps[label] + dpp._data["timestamps"] + [receive_ts, time()]
         self.callback_result = self.callback(initial=self.callback_result, dpp=dpp)
 
     def send_to_edge(self, model, participant_dpp, program):
+        from time import time
         from ancile.core.primitives import DataPolicyPair
         import dill
         import uuid
@@ -94,6 +100,8 @@ class RemoteClient:
         with open(os.path.join(webroot, uuid), 'wb+') as f:
             dill.dump(dpp_to_send, f)
 
+        self.timestamps[label] = [model._data["timestamp"], time()]
+
         body = {
                 "program": program,
                 "model_url": f"{model_base_url}/{uuid}",
@@ -116,7 +124,7 @@ class RemoteClient:
             elif not model_url:
                 self.error = self.error or "error on node: {}".format(node)
             else:
-                self.__process_model(model_url)
+                self.__process_model(model_url, node)
                 self.nodes.remove(node)
 
         if self.error:
@@ -130,15 +138,18 @@ def train_local(model, data_point):
     This part simulates the
 
     """
+    from time import time
     from ancile.lib.federated_helpers.training import _train_local
     model["train_data"] = data_point
     output = _train_local(**model)
+    output["timestamps"] = [time()]
     return output
 
 
 @TransformDecorator()
 #@profile
 def accumulate(initial, dpp):
+    from time import time
     import torch
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.enabled= True
@@ -146,9 +157,10 @@ def accumulate(initial, dpp):
     # averaging part
     initial = initial or dict()
     counter = initial.pop("counter", 0)
+    timestamps = initial.pop("timestamps", [])
+    timestamps.append(dpp.pop("timestamps") + [time()])
     initial = initial.pop("initial", dict())
-    print(dpp)
-    for name, data in dpp[0].items():
+    for name, data in dpp.items():
         #### don't scale tied weights:
         if name == 'decoder.weight' or '__' in name:
             continue
@@ -159,6 +171,7 @@ def accumulate(initial, dpp):
         del data
     initial["counter"] = counter+1
     initial["initial"] = initial
+    initial["timestamps"] = timestamps
     return initial
 
 
@@ -171,6 +184,7 @@ def average(accumulated, model, enforce_user_count=0): #summed_dps, global_model
     helper = model["helper"]
     model = model["model"]
     accumulated = accumulated or dict()
+    timestamps = accumulated.pop("timestamps", [])
     if enforce_user_count and enforce_user_count > accumulated.get("counter", 0):
         raise Exception("User count mismatch")
 
@@ -187,4 +201,5 @@ def average(accumulated, model, enforce_user_count=0): #summed_dps, global_model
             update_per_layer.add_(noised_layer)
         with torch.no_grad():
             data.add_(update_per_layer)
+    model["timestamps"] = timestamps
     return model

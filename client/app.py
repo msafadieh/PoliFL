@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import os
 from io import BytesIO
+from time import time
 from threading import Thread
 from uuid import uuid4
 
@@ -28,7 +29,9 @@ def execute_program(model_url, callback_url, program):
 #    curl.setopt(curl.CAINFO, certifi.where())
 #    curl.perform()
     resp = requests.get(model_url).content
+    receive_ts = time()
     dpp = dill.loads(resp)
+    pickled_ts = time()
 #    curl.close()
     
     res = execute(users_secrets=[],
@@ -41,9 +44,11 @@ def execute_program(model_url, callback_url, program):
     elif not res["data"]:
         message = {"status": "ERROR", "error": "No DPP returned"}
     else:
+        dpp = res["data"][0]
+        dpp._data["timestamps"] = [receive_ts, pickled_ts] + dpp._data["timestamps"]
         uuid = str(uuid4())
         with open(os.path.join(WEBROOT, uuid), "wb+") as f:
-            dill.dump(res["data"], f)
+            dill.dump(dpp, f)
             message = {"status": "OK", "data_policy_pair": "{}{}".format(WEBPATH, uuid)}
     print(message)
     res = requests.post(callback_url, json=message, headers={"X-API-Key": NODEKEY})

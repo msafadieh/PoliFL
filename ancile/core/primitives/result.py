@@ -31,7 +31,11 @@ class Result:
             if encryption_keys:
                 encryption_keys.clear()
         return True
-
+    
+    @TransformDecorator()
+    def return_timestamps(self, data):
+        self._dp_pair_data.append(data.pop("timestamps"))
+        return data
 
     def return_to_web(self, dpp):
         self._dp_pair_data.append(dpp)
