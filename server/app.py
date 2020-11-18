@@ -252,7 +252,7 @@ def jobs_view(app_label, job_label):
 @app.route("/rpc/<string:app_label>/<string:job_label>/<string:node_label>", methods=["POST"])
 def rpc_view(app_label, job_label, node_label):
     node = session.query(Node).filter(Node.label==node_label,
-                                         Node.api_key==request.headers.get("X-API-Key", ""))
+                                         Node.api_key==request.headers.get("X-API-Key", "")).first()
 
     if not node:
         return make_403()
@@ -263,7 +263,15 @@ def rpc_view(app_label, job_label, node_label):
     queue = jobs[app_label][job_label]["rpc_queue"]
     json = request.json
     if json["status"] == "OK":
-        queue.put_nowait((node_label, json["data_policy_pair"], ))
+        if config["WG_ON"]:
+            if node.allowed_ips:
+                node_host = node.allowed_ips
+                if "/" in node_host:
+                    node_host = node_host.rstrip("0123456789").rstrip("/")
+        else:
+            node_host = policy.node.label
+
+        queue.put_nowait((node_label, f"http://{node_host}/{json['data_policy_pair']}", ))
     else:
         queue.put_nowait((node_label, None, ))
 

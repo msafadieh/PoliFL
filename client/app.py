@@ -2,6 +2,7 @@
 import os
 from io import BytesIO
 from threading import Thread
+from uuid import uuid4
 
 import certifi
 import dill
@@ -13,8 +14,8 @@ import ancile
 from ancile.core.core import execute
 
 NODEKEY = os.environ["NODE_KEY"]
-WEBROOT = os.environ.get("WEBROOT", "/var/www/html")
-WEBPATH = os.environ.get("WEBPATH", "/")
+WEBROOT = os.environ.get("WEBROOT", "/var/www/html/models")
+WEBPATH = os.environ.get("WEBPATH", "/models/")
 
 app = Flask(__name__)
 
@@ -41,7 +42,7 @@ def execute_program(model_url, callback_url, program):
         message = {"status": "ERROR", "error": "No DPP returned"}
     else:
         uuid = str(uuid4())
-        with open(os.path.join(WEBROOT, uuid), "w") as f:
+        with open(os.path.join(WEBROOT, uuid), "wb+") as f:
             dill.dump(res["data"], f)
             message = {"status": "OK", "data_policy_pair": "{}{}".format(WEBPATH, uuid)}
     print(message)

@@ -7,9 +7,14 @@ name="databox"
 @ExternalDecorator()
 def get_latest_reddit_data(user, session):
     import json
+    import random
     import requests
 
-    return json.loads(requests.get("https://gist.githubusercontent.com/msafadieh/869c51a75bc77e5d8746b432c7a1f354/raw/6cfd0f7dacc317ba4dd58831014fdfb6dc2b3f66/data.json").text)
+    resp = json.loads(requests.get("https://gist.githubusercontent.com/msafadieh/869c51a75bc77e5d8746b432c7a1f354/raw/6cfd0f7dacc317ba4dd58831014fdfb6dc2b3f66/data.json").text)
+    
+    sents = json.loads(resp['data'][0]['data']['data'])
+    return random.choice(sents)
+
     url = "https://127.0.0.1/app-ancile/ui/tsblob/latest"
     payload = { "data_source_id": "redditSimulatorData"}
     headers = { "session": session }

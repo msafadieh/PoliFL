@@ -54,18 +54,19 @@ class RemoteClient:
         self.error = None
 
     def __process_model(self, model_url):
-        from io import BytesIO
-        import pycurl
+        #from io import BytesIO
+        #import pycurl
         import dill
-        bytes_buffer = BytesIO() 
-        curl = pycurl.Curl()
-        curl.setopt(curl.URL, model_url)
-        curl.setopt(curl.WRITEDATA, str_buffer)
-        curl.setopt(curl.CAINFO, certifi.where())
-        curl.perform()
-        curl.close()
-
-        dpp = dill.load(bytes_buffer)
+        import requests
+        #bytes_buffer = BytesIO() 
+        #curl = pycurl.Curl()
+        #curl.setopt(curl.URL, model_url)
+        #curl.setopt(curl.WRITEDATA, str_buffer)
+        #curl.setopt(curl.CAINFO, certifi.where())
+        #curl.perform()
+        #curl.close()
+        resp = requests.get(model_url).content
+        dpp = dill.loads(resp)
         self.callback_result = self.callback(initial=self.callback_result, dpp=dpp)
 
     def send_to_edge(self, model, participant_dpp, program):
@@ -146,7 +147,8 @@ def accumulate(initial, dpp):
     initial = initial or dict()
     counter = initial.pop("counter", 0)
     initial = initial.pop("initial", dict())
-    for name, data in dpp.items():
+    print(dpp)
+    for name, data in dpp[0].items():
         #### don't scale tied weights:
         if name == 'decoder.weight' or '__' in name:
             continue

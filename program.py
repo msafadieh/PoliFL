@@ -21,4 +21,4 @@ while rounds:
                             participant_dpp=participant_dpp,
                             program=remote_program)
     accumulated = client.poll_and_process_responses()
-    model = federated.average(accumulated=accumulated, model=model, enforce_user_count=312)
+    model = federated.average(accumulated=accumulated, model=model, enforce_user_count=1)

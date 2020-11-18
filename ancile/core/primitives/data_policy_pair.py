@@ -102,7 +102,7 @@ class DataPolicyPair:
         Combine dpps when they are provided as a list. Not used yet.
         """
 
-        new_dpp = dcopy(dpp_list[0])
+        new_dpp = deepcopy(dpp_list[0])
         new_dpp._data = [new_dpp._data]
         for dpp in dpp_list[1:]:
             if new_dpp._name != dpp._name:
