@@ -43,7 +43,7 @@ Your server should be listening on port 80.
 4. Run it using the following command. Make sure to replace `$NODE_NAME`, `$NODE_KEY`, and `http://my-central-service` with correct values:
 ```
 docker run \
-	--name="ancile-server" \
+	--name="ancile-client" \
 	--cap-add=NET_ADMIN \
 	--cap-add=SYS_MODULE \
 	-v /lib/modules:/lib/modules \
