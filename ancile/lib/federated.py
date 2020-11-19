@@ -138,10 +138,14 @@ def train_local(model, data_point):
     This part simulates the
 
     """
-    from time import time
+    import os
+    from time import sleep, time
     from ancile.lib.federated_helpers.training import _train_local
     model["train_data"] = data_point
     output = _train_local(**model)
+
+    sleep(os.environ.get("DELAY") or 0)
+
     output["timestamps"] = [time()]
     return output
 
