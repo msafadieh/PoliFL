@@ -144,9 +144,10 @@ def train_local(model, data_point):
     model["train_data"] = data_point
     output = _train_local(**model)
 
-    sleep(float(os.environ.get("DELAY")) or 0)
+    delay = float(os.environ.get("DELAY") or 0)
+    sleep(delay)
 
-    output["timestamps"] = [time()]
+    output["timestamps"] = [delay, time()]
     return output
 
 
