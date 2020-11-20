@@ -144,7 +144,7 @@ def train_local(model, data_point):
     model["train_data"] = data_point
     output = _train_local(**model)
 
-    sleep(os.environ.get("DELAY") or 0)
+    sleep(int(os.environ.get("DELAY")) or 0)
 
     output["timestamps"] = [time()]
     return output
