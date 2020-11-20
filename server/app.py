@@ -188,12 +188,15 @@ def jobs_view(app_label, job_label):
 
     if request.method == "GET":
         if app_label in jobs and job_label in jobs[app_label]:
+            if "result" in jobs[app_label][job_label]:
+                return jobs[app_label][job_label]["result"]
             try:
                 status = jobs[app_label][job_label]["status_queue"].get_nowait()
             except Empty:
                 status = None
             if status:
-                return jobs[app_label][job_label]
+                jobs[app_label][job_label]["result"] = status
+                return status
             else:
                 return "Running"
         return make_404()
