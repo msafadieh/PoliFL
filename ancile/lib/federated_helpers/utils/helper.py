@@ -70,14 +70,14 @@ class Helper:
         self.bptt = self.params.get('bptt', False)
         self.recreate_dataset = self.params.get('recreate_dataset', False)
 
-
-        if self.log:
-            try:
-                os.mkdir(self.folder_path)
-            except FileExistsError:
-                logger.info('Folder already exists')
-        else:
-            self.folder_path = None
+        #
+        # if self.log:
+        #     try:
+        #         os.mkdir(self.folder_path)
+        #     except FileExistsError:
+        #         logger.info('Folder already exists')
+        # else:
+        self.folder_path = None
 
         # if not self.params.get('environment_name', False):
         #     self.params['environment_name'] = self.name
