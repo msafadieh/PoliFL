@@ -22,9 +22,7 @@ from torch.autograd import Variable
 import h5py
 import matplotlib as mpl
 mpl.use('Agg')
-import matplotlib.pyplot as plt
 import numpy as np
-from numba import jit
 from sklearn.metrics import *
 from tqdm import tqdm
 
@@ -135,25 +133,6 @@ class TelefonicaHelper(Helper):
         return train_iterator
 
 
-
-    def test(self, model, data, epsilon=1e-6):
-        data_test = data[0]
-        data_test_unk = data[1]
-        # test(model, None, data, self.column_names, self.uids['test'], 'Test')
-        output_array_test = test(model, None, data_test, self.column_names, self.uids['test'], desc='Test')
-
-        # Start validation with test_unk dataset...
-        output_array_test_unk = test(model, None, data_test_unk, self.column_names, self.uids['test_unk'],
-                                     desc='Test unknown')
-
-        # write output into one csv file
-        tqdm.write("Writing output file...")
-        output_arrays = [output_array_test, output_array_test_unk]
-
-        output_filename = f'dlpt_results_{self.params["tb_name"]}.csv'
-        logger.error(f'Writing: {output_filename}.')
-        write_output(output_arrays, output_filename)
-        return 0, output_array_test
 
 
     def get_batch(self, train_data, batch, evaluation=False):
