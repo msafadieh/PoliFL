@@ -1,0 +1,89 @@
+
+data_type: telefonica
+
+# Training params
+test_batch_size: 1
+lr: 1
+momentum: 0
+decay: 0
+
+# FedLearning params
+no_models: 237
+epochs: 1
+retrain_no_times: 2
+number_of_total_participants: 237
+eta: 10
+
+#
+save_on_epochs: [10, 100, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000]
+word_dictionary_path: utils/50k_word_dictionary.pt
+
+report_train_loss: false
+report_test_loss: false
+track_distance: false
+output_examples: true
+log_interval: 10
+
+
+
+scale_weights: 1
+data_path: data
+batch_size: 1
+
+# dp_schedule:
+#   - users:
+#       start: 118
+#       finish: 237
+#     dp: False
+#     s_norm: 15
+#     sigma: 0.01
+#     epoch:
+#       start: 0
+#       finish: 250
+#   - users:
+#       start: 0
+#       finish: 118
+#     dp: False
+#     s_norm: 15
+#     sigma: 0.001
+#     epoch:
+#       start: 250
+#       finish: 500
+
+
+diff_privacy: false
+#s_norm: 8
+#sigma: 0.001
+
+#dp_schedule:
+#  - users:
+#      start: 0
+#      finish: 40000
+#    s_norm: 15
+#    sigma: 0.01
+#    epoch:
+#      start: 0
+#      finish: 2000
+#  - users:
+#      start: 40000
+#      finish: 80000
+#    s_norm: 15
+#    sigma: 0.001
+#    epoch:
+#      start: 2000
+#      finish: 4000
+
+# configs for the NLP model
+emsize: 200
+nhid: 200
+nlayers: 2
+dropout: 0.2
+tied: true
+bptt: 64
+clip: 0.25
+seed: 1
+data_folder: data/data/
+
+save_model: False
+log: True
+tb: False

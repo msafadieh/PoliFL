@@ -1,20 +1,38 @@
 from ancile.core.decorators import TransformDecorator
+from ancile.lib.federated_helpers.utils.image_helper import ImageHelper
+
 name = 'federated'
 
-def new_model(policy):
+def new_model(policy, task='text'):
     from time import time
     from ancile.core.primitives import DataPolicyPair
     import yaml
     from ancile.utils.text_load import load_data
     from ancile.lib.federated_helpers.utils.text_helper import TextHelper
-
-    corpus = load_data('/data/corpus.pt.tar')
-    with open('ancile/lib/federated_helpers/utils/words.yaml') as f:
-        params = yaml.load(f)
-    helper = TextHelper(params=params, current_time='None',
-                        name='databox', n_tokens=50000)
-    helper.load_data(corpus=corpus)
-    model = helper.create_one_model().state_dict()
+    if task == 'text':
+        corpus = load_data('/data/corpus.pt.tar')
+        with open('ancile/lib/federated_helpers/utils/words.yaml') as f:
+            params = yaml.load(f)
+        helper = TextHelper(params=params, current_time='None',
+                            name='databox', n_tokens=50000)
+        helper.load_data(corpus=corpus)
+        model = helper.create_one_model().state_dict()
+    elif task=='image':
+        with open('ancile/lib/federated_helpers/utils/params.yaml') as f:
+            params = yaml.load(f)
+        helper = ImageHelper(params=params, current_time='None',
+                            name='databox', n_tokens=50000)
+        helper.load_data()
+        model = helper.create_one_model().state_dict()
+    elif task=='tf':
+        with open('ancile/lib/federated_helpers/utils/tf.yaml') as f:
+            params = yaml.load(f)
+        helper = ImageHelper(params=params, current_time='None',
+                            name='databox', n_tokens=50000)
+        helper.load_data()
+        model = helper.create_one_model().state_dict()
+    else:
+        raise ValueError('No such task.')
     dpp = DataPolicyPair(policy=policy)
     dpp._data = {"model": model, "helper": helper, "timestamp": time()}
     return dpp

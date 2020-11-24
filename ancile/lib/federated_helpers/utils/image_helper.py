@@ -12,7 +12,7 @@ import torchvision
 # from models.word_model import RNNModel
 # from utils.nlp_dataset import NLPDataset
 # from utils.text_load import *
-from models.resnet import ResNet18
+from ancile.lib.federated_helpers.models.resnet import ResNet18
 from torchvision import datasets, transforms
 import numpy as np
 logger = logging.getLogger("logger")
@@ -42,6 +42,11 @@ class ImageHelper(Helper):
 
         self.local_model = local_model
         self.target_model = target_model
+
+    def create_one_model(self):
+
+        return self.create_model()
+
 
     def load_data(self):
         logger.info('Loading data')
