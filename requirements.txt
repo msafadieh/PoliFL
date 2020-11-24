@@ -2,6 +2,7 @@ colorlog
 matplotlib
 sklearn
 torchvision
+numba
 
 certifi==2019.11.28
 cffi==1.14.2
