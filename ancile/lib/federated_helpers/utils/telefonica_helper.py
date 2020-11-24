@@ -2,28 +2,11 @@ import torch
 from collections import defaultdict
 
 # system
-import argparse
-import datetime
-import os
 from sklearn.utils import shuffle
-import sys
-import time
-
-# pytorch
-import torch
-# self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# print("Training on: ", self.device)
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.autograd import Variable
 
 # external libs
-import h5py
 import matplotlib as mpl
 mpl.use('Agg')
-import numpy as np
-from sklearn.metrics import *
 from tqdm import tqdm
 
 # scripts from this project
@@ -46,9 +29,7 @@ NUM_NON_ZERO_IMPUTATIONS = 1
 DATA_FILE = 'data.h5'
 
 from ancile.lib.federated_helpers.utils.helper import Helper
-import random
 import logging
-import torchvision
 
 from ancile.lib.federated_helpers.models.tf_pytorch_classifier import *
 
