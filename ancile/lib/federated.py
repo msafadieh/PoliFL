@@ -1,5 +1,4 @@
 from ancile.core.decorators import TransformDecorator
-from ancile.lib.federated_helpers.utils.image_helper import ImageHelper
 
 name = 'federated'
 
@@ -9,6 +8,11 @@ def new_model(policy, task='text'):
     import yaml
     from ancile.utils.text_load import load_data
     from ancile.lib.federated_helpers.utils.text_helper import TextHelper
+    from ancile.lib.federated_helpers.utils.image_helper import ImageHelper
+    from ancile.lib.federated_helpers.utils.telefonica_helper import \
+        TelefonicaHelper
+
+
     if task == 'text':
         corpus = load_data('/data/corpus.pt.tar')
         with open('ancile/lib/federated_helpers/utils/words.yaml') as f:
@@ -27,7 +31,7 @@ def new_model(policy, task='text'):
     elif task=='tf':
         with open('ancile/lib/federated_helpers/utils/tf.yaml') as f:
             params = yaml.load(f)
-        helper = ImageHelper(params=params, current_time='None',
+        helper = TelefonicaHelper(params=params, current_time='None',
                             name='databox', n_tokens=50000)
         helper.load_data()
         model = helper.create_one_model().state_dict()
