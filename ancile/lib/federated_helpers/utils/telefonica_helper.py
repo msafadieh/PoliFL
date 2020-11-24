@@ -82,48 +82,49 @@ class TelefonicaHelper(Helper):
 
     def load_data(self):
         # Load dataset
-        DATA_FOLDERS = [('train', f'data/{self.data_path}/train/'),
-                        ('valid', f'data/{self.data_path}/validation/'),
-                        ('test', f'data/{self.data_path}/test/'),
-                        ('test_unk', f'data/{self.data_path}/test_unk/')]
-        model_folder = os.path.dirname('../models/%s/' % time.strftime('%Y%m%d-%H%M%S'))
-        os.makedirs(model_folder)
-
-        # Load data and loop for every set
-        data = {}
-        self.uids = {}
-        column_names = None
-        for mode, bin_folder in DATA_FOLDERS:
-            bin_folder = os.path.join(bin_folder, 'compressed')
-            data_file_path = os.path.join(bin_folder, DATA_FILE)
-            h5f = h5py.File(data_file_path, 'r', libver='latest')
-            num_buckets = h5f.attrs['num_buckets']
-            self.uids[mode] = h5f.attrs['uuids']
-            if column_names is None:
-                column_names = h5f.attrs['column_names'].tolist()
-            '''
-            meta_data_entries = h5f.attrs.keys()
-            print("Using %s data file %s, %d meta data entries:" % (mode, data_file_path, len(meta_data_entries)))
-            for item in meta_data_entries:
-                print("\t", item + " : ", h5f.attrs[item])
-            print
-            #'''
-
-            print("loading %d %s buckets FROM %s" % (num_buckets, mode, data_file_path))
-            bucket_list = []
-            for bucket_num in tqdm(range(1, num_buckets + 1), ncols=100):
-                name = 'bucket_%d' % bucket_num
-                bucket = h5f[name][:]
-                tqdm.write("\t%s: %s" % (name, bucket.shape))
-                bucket_list.append(bucket)
-            h5f.close()
-            data[mode] = bucket_list[:]
-
-        self.train_data = data['train']
-        self.val_data = data['valid']
-        # self.test_data = data['test']
-        self.test_data = [data['test'], data['test_unk']]
-        self.column_names = column_names
+        # DATA_FOLDERS = [('train', f'data/{self.data_path}/train/'),
+        #                 ('valid', f'data/{self.data_path}/validation/'),
+        #                 ('test', f'data/{self.data_path}/test/'),
+        #                 ('test_unk', f'data/{self.data_path}/test_unk/')]
+        # model_folder = os.path.dirname('../models/%s/' % time.strftime('%Y%m%d-%H%M%S'))
+        # os.makedirs(model_folder)
+        #
+        # # Load data and loop for every set
+        # data = {}
+        # self.uids = {}
+        # column_names = None
+        # for mode, bin_folder in DATA_FOLDERS:
+        #     bin_folder = os.path.join(bin_folder, 'compressed')
+        #     data_file_path = os.path.join(bin_folder, DATA_FILE)
+        #     h5f = h5py.File(data_file_path, 'r', libver='latest')
+        #     num_buckets = h5f.attrs['num_buckets']
+        #     self.uids[mode] = h5f.attrs['uuids']
+        #     if column_names is None:
+        #         column_names = h5f.attrs['column_names'].tolist()
+        #     '''
+        #     meta_data_entries = h5f.attrs.keys()
+        #     print("Using %s data file %s, %d meta data entries:" % (mode, data_file_path, len(meta_data_entries)))
+        #     for item in meta_data_entries:
+        #         print("\t", item + " : ", h5f.attrs[item])
+        #     print
+        #     #'''
+        #
+        #     print("loading %d %s buckets FROM %s" % (num_buckets, mode, data_file_path))
+        #     bucket_list = []
+        #     for bucket_num in tqdm(range(1, num_buckets + 1), ncols=100):
+        #         name = 'bucket_%d' % bucket_num
+        #         bucket = h5f[name][:]
+        #         tqdm.write("\t%s: %s" % (name, bucket.shape))
+        #         bucket_list.append(bucket)
+        #     h5f.close()
+        #     data[mode] = bucket_list[:]
+        #
+        # self.train_data = data['train']
+        # self.val_data = data['valid']
+        # # self.test_data = data['test']
+        # self.test_data = [data['test'], data['test_unk']]
+        # self.column_names = column_names
+        self.train_data = np.load('data/train_data.npy')
 
 
         return
