@@ -85,5 +85,5 @@ seed: 1
 data_folder: data/data/
 
 save_model: False
-log: True
+log: False
 tb: False
