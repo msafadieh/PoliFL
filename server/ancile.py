@@ -2,7 +2,7 @@ import json
 from time import time
 from ancile.core.core import execute
 
-def execute_program(program, dpps, status_queue, rpc_queuservere):
+def execute_program(program, dpps, status_queue, rpc_queue):
     print("Starting thread....")
     res = execute(users_secrets=[],
             program=program,
