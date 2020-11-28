@@ -1,6 +1,8 @@
+import json
+from time import time
 from ancile.core.core import execute
 
-def execute_program(program, dpps, status_queue, rpc_queue):
+def execute_program(program, dpps, status_queue, rpc_queuservere):
     print("Starting thread....")
     res = execute(users_secrets=[],
             program=program,
@@ -9,5 +11,7 @@ def execute_program(program, dpps, status_queue, rpc_queue):
             app_module=None,
             rpc_queue=rpc_queue)
     status_queue.put_nowait(res)
+    with open("/data/result-{time()}.json") as f:
+        json.dump(res, f)
     print("Killing thread....")
 
