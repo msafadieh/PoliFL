@@ -101,7 +101,7 @@ def _train_local(helper, model_id, train_data, global_model, perform_training=Tr
     # substract global model
     weights = dict()
     for name, data in model.named_parameters():
-        if name == 'decoder.weight' or '__' in name:
+        if name == 'decoder.weight' or '__' in name or 'running' in name or 'tracked' in name:
             continue
         weights[name] = data
 

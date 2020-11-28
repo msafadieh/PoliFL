@@ -190,7 +190,7 @@ def accumulate(initial, dpp):
     initial = initial.pop("initial", dict())
     for name, data in dpp.items():
         #### don't scale tied weights:
-        if name == 'decoder.weight' or '__' in name:
+        if name == 'decoder.weight' or '__' in name or 'running' in name or 'tracked' in name:
             continue
         if initial.get(name, False) is False:
             initial[name] = torch.zeros_like(data, requires_grad=True)
@@ -220,7 +220,7 @@ def average(accumulated, model, enforce_user_count=0): #summed_dps, global_model
 
     for name, data in model.items():
         #### don't scale tied weights:
-        if name == 'decoder.weight' or '__' in name:
+        if name == 'decoder.weight' or '__' in name or 'running' in name or 'tracked' in name:
             continue
 
         update_per_layer = accumulated[name] * eta
