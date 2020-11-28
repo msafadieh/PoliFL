@@ -19,26 +19,27 @@ def new_model(policy, task='text'):
             params = yaml.load(f)
         helper = TextHelper(params=params, current_time='None',
                             name='databox', n_tokens=50000)
-        helper.load_data(corpus=corpus)
+        # helper.load_data(corpus=corpus)
         model = helper.create_one_model().state_dict()
     elif task=='image':
         with open('ancile/lib/federated_helpers/utils/params.yaml') as f:
             params = yaml.load(f)
         helper = ImageHelper(params=params, current_time='None',
                             name='databox', n_tokens=50000)
-        helper.load_data()
+        # helper.load_data()
         model = helper.create_one_model().state_dict()
     elif task=='tf':
         with open('ancile/lib/federated_helpers/utils/tf.yaml') as f:
             params = yaml.load(f)
         helper = TelefonicaHelper(params=params, current_time='None',
                             name='databox', n_tokens=50000)
-        helper.load_data()
+        # helper.load_data()
         model = helper.create_one_model().state_dict()
     else:
         raise ValueError('No such task.')
     dpp = DataPolicyPair(policy=policy)
-    dpp._data = {"model": model, "helper": helper, "timestamp": time()}
+    dpp._data = {"model": model, "helper": helper, "timestamp": time(),
+                 "perform_training": False}
     return dpp
 
 def select_users(user_count, dpps):
