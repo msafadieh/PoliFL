@@ -103,7 +103,7 @@ def _train_local(helper, model_id, train_data, global_model, perform_training=Tr
     for name, data in model.named_parameters():
         if name == 'decoder.weight' or '__' in name:
             continue
-        weights[name] = data - global_model[name]
+        weights[name] = data
 
     return weights
 
