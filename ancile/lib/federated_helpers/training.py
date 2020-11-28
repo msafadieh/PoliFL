@@ -53,7 +53,7 @@ def _train_local(helper, model_id, train_data, global_model, perform_training=Tr
     model.copy_params(global_model)
 
 
-    if perform_training:
+    if False:
         optimizer = torch.optim.SGD(model.parameters(), lr=helper.lr,
                                     momentum=helper.momentum,
                                     weight_decay=helper.decay)
