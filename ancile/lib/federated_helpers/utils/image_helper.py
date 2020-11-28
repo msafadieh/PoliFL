@@ -24,12 +24,8 @@ class ImageHelper(Helper):
     test_loader = None
 
     def create_model(self):
-        local_model = ResNet18(name='Local',
-                               created_time=self.params['current_time'])
-        local_model.cuda()
         target_model = ResNet18(name='Target',
                                 created_time=self.params['current_time'])
-        target_model.cuda()
         if self.resumed_model:
             loaded_params = torch.load(f"saved_models/{self.params['resumed_model']}")
             target_model.load_state_dict(loaded_params['state_dict'])
@@ -40,8 +36,8 @@ class ImageHelper(Helper):
         else:
             self.start_epoch = 1
 
-        self.local_model = local_model
         self.target_model = target_model
+        return target_model
 
     def create_one_model(self):
 

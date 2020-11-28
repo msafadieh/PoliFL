@@ -27,7 +27,7 @@ class Helper:
         self.poisoned_data = None
         self.test_data_poison = None
         self.writer = None
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cpu')
 
         self.n_tokens = n_tokens
         self.params = params

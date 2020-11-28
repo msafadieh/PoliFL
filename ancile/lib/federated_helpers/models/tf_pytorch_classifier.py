@@ -13,7 +13,7 @@ import time
 
 # pytorch
 import torch
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cpu")
 print("Training on: ", DEVICE)
 import torch.nn as nn
 from torch.autograd import Variable
