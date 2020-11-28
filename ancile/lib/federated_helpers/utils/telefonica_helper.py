@@ -55,8 +55,10 @@ class TelefonicaHelper(Helper):
         return
 
     def create_one_model(self):
+        batch_size_train, seq_len, num_features = (self.batch_size, 50, 60)
+        num_features -= 2
 
-        return self.create_model()
+        return Model('Local_Model', self.params['current_time'],  batch_size_train, seq_len, num_features).to(self.device)
 
 
     def load_data(self):

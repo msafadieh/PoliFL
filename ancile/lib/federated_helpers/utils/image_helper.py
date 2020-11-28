@@ -36,12 +36,15 @@ class ImageHelper(Helper):
         else:
             self.start_epoch = 1
 
+        self.local_model = target_model
         self.target_model = target_model
+
         return target_model
 
     def create_one_model(self):
 
-        return self.create_model()
+        return ResNet18(name='Target',
+                                created_time=self.params['current_time'])
 
 
     def load_data(self):
